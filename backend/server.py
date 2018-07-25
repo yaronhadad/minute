@@ -101,6 +101,7 @@ async def consume_audio(track):
     """
     Drain incoming audio and write it to a file.
     """
+    print("CONSUMING AUDIO")
     writer = None
 
     try:
@@ -159,7 +160,7 @@ async def offer(request):
 
     # prepare local media
     local_audio = AudioFileTrack(path=os.path.join(ROOT, "demo-instruct.wav"))
-    local_video = VideoTransformTrack(transform=params["video_transform"])
+    # local_video = VideoTransformTrack(transform=params["video_transform"])
 
     @pc.on("datachannel")
     def on_datachannel(channel):
@@ -169,14 +170,16 @@ async def offer(request):
 
     @pc.on("track")
     def on_track(track):
+        print("RECEIVE TRACK", track)
         if track.kind == "audio":
             # pc.addTrack(local_audio)
             pc._consumers.append(asyncio.ensure_future(consume_audio(track)))
         elif track.kind == "video":
-            pc.addTrack(local_video)
-            pc._consumers.append(
-                asyncio.ensure_future(consume_video(track, local_video))
-            )
+            # pc.addTrack(local_video)
+            # pc._consumers.append(
+            #     asyncio.ensure_future(consume_video(track, local_video))
+            # )
+            pass
 
     await pc.setRemoteDescription(offer)
     answer = await pc.createAnswer()
@@ -194,6 +197,7 @@ pcs = []
 
 
 async def on_shutdown(app):
+    print("CLOSING")
     # stop audio / video consumers
     for pc in pcs:
         for c in pc._consumers:

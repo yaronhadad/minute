@@ -1,30 +1,51 @@
 .container {
-  background-color: #282c34;
   display: flex;
   flex-direction: column;
   text-align: center;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  /* font-size: calc(10px + 2vmin); */
+  color: black;
+  width: 200px;
   padding: 1rem;
 }
 
 .logo {
-  animation: logoSpin infinite 20s linear;
   height: 40vmin;
 }
 
 .link {
-  color: #ffeb3b;
   outline: none;
 }
+.record,
+.recording {
+  border: 2px solid red;
+  border-radius: 5px;
+  color: red;
+  text-transform: uppercase;
+  padding: 10px;
+  display: block;
+  cursor: pointer;
+}
+.recording::before {
+  content: "";
+  background: red;
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  border-radius: 50%;
+  margin-right: 12px;
+  animation: recordingAnimation infinite 1s linear;
+}
 
-@keyframes logoSpin {
+@keyframes recordingAnimation {
   from {
-    transform: rotate(0deg);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
   }
   to {
-    transform: rotate(360deg);
+    opacity: 0;
   }
 }
