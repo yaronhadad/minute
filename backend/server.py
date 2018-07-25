@@ -97,7 +97,7 @@ class VideoTransformTrack(VideoStreamTrack):
             return frame
 
 
-async def consume_audio(track):
+async def consume_audio(track, pc):
     """
     Drain incoming audio and write it to a file.
     """
@@ -112,6 +112,8 @@ async def consume_audio(track):
                 writer.setnchannels(frame.channels)
                 writer.setframerate(frame.sample_rate)
                 writer.setsampwidth(frame.sample_width)
+            if pc._datachannel:
+                pc._datachannel.send("OH YES")
             writer.writeframes(frame.data)
     finally:
         if writer is not None:
@@ -156,6 +158,7 @@ async def offer(request):
 
     pc = RTCPeerConnection()
     pc._consumers = []
+    pc._datachannel = None
     pcs.append(pc)
 
     # prepare local media
@@ -164,6 +167,8 @@ async def offer(request):
 
     @pc.on("datachannel")
     def on_datachannel(channel):
+        pc._datachannel = channel
+
         @channel.on("message")
         def on_message(message):
             channel.send("pong")
@@ -173,7 +178,7 @@ async def offer(request):
         print("RECEIVE TRACK", track)
         if track.kind == "audio":
             # pc.addTrack(local_audio)
-            pc._consumers.append(asyncio.ensure_future(consume_audio(track)))
+            pc._consumers.append(asyncio.ensure_future(consume_audio(track, pc)))
         elif track.kind == "video":
             # pc.addTrack(local_video)
             # pc._consumers.append(

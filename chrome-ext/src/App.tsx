@@ -74,12 +74,18 @@ class App extends React.Component {
   state = {
     recording: false
   };
+  dataChannelLog: HTMLElement | null = null;
   private recordStart = () => {
     this.setState({ recording: true });
     chrome.tabCapture.capture({ audio: true }, stream => {
       if (!stream) {
         throw new Error("OH NOOO");
       }
+      const audio = document.createElement("audio");
+      audio.autoplay = true;
+      audio.controls = false;
+      audio.srcObject = stream;
+
       // const audioCtx = new AudioContext();
       // const source = audioCtx.createMediaStreamSource(stream);
       stream.getTracks().forEach(function(track) {
@@ -87,6 +93,28 @@ class App extends React.Component {
       });
       negotiate();
     });
+
+    if (this.dataChannelLog === null) {
+      throw new Error("Data channel not available");
+    }
+    let dataChannelLog = this.dataChannelLog;
+    const dc = (pc as any).createDataChannel("chat");
+    let dcInterval: number | undefined;
+    dc.onclose = function() {
+      // clearInterval(dcInterval);
+      dataChannelLog.textContent += "- close\n";
+    };
+    dc.onopen = function() {
+      dataChannelLog.textContent += "- open\n";
+      // dcInterval = setInterval(function() {
+      //   var message = "ping";
+      //   dataChannelLog.textContent += "> " + message + "\n";
+      //   dc.send(message);
+      // }, 1000) as any;
+    };
+    dc.onmessage = function(evt: any) {
+      dataChannelLog.textContent += "< " + evt.data + "\n";
+    };
   };
   private recordStop = () => {
     stop();
@@ -104,6 +132,7 @@ class App extends React.Component {
             Stop
           </a>
         )}
+        <div ref={c => (this.dataChannelLog = c)}>Datachannel</div>
       </div>
     );
   }
