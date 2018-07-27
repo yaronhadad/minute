@@ -3,6 +3,10 @@ from google.cloud import speech
 from google.cloud.speech import enums
 from google.cloud.speech import types
 import io
+import argparse
+import os
+
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(os.path.dirname(__file__), "google-speech.json")
 
 # GOOGLE_SPEECH_API_KEY = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw"
 # GOOGLE_SPEECH_API_URL = "http://www.google.com/speech-api/v2/recognize" + \
@@ -23,8 +27,8 @@ def transcribe_streaming(stream_file, enable_speaker_diarization=False):
     config = types.RecognitionConfig(
         encoding=enums.RecognitionConfig.AudioEncoding.LINEAR16,
         sample_rate_hertz=16000,
-        language_code='en-US',
-        enable_speaker_diarization=enable_speaker_diarization)
+        language_code='en-US')
+    # enable_speaker_diarization=enable_speaker_diarization
     ## enable_speaker_diarization=True, diarization_speaker_count=2
     #         api_key=GOOGLE_SPEECH_API_KEY
     ## enable_word_confidence=True
@@ -39,7 +43,7 @@ def transcribe_streaming(stream_file, enable_speaker_diarization=False):
         # is_final result. The other results will be for subsequent portions of
         # the audio.
         for result in response.results:
-            yield result.is_final
+            # yield result.is_final
 
             print('Finished: {}'.format(result.is_final))
             print('Stability: {}'.format(result.stability))
